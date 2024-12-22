@@ -1,3 +1,5 @@
+import { Credentials, SecurityContext } from "./auth.model";
+
 /**
  * Represents a client session in the database
  */
@@ -21,6 +23,16 @@ interface Session {
    * Last activity timestamp
    */
   lastActivity: Date;
+
+  /**
+   * Client credentials associated with this session
+   */
+  credentials?: Credentials;
+
+  /**
+   * Security context after successful authentication
+   */
+  securityContext?: SecurityContext;
 }
 
 /**

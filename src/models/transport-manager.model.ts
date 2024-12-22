@@ -1,3 +1,5 @@
+import { Credentials } from "./auth.model";
+
 /**
  * TransportManager interface defines the contract for managing database connections,
  * client authentication, session management, and load balancing.
@@ -13,7 +15,7 @@ interface TransportManager {
    * Authenticates a client attempting to connect to the database.
    * @returns boolean indicating whether authentication was successful
    */
-  authenticateClient(): boolean;
+  authenticateClient(credentials: Credentials): Promise<boolean>;
 
   /**
    * Manages an active client session, including connection state,

@@ -1,5 +1,6 @@
 import type TransportManager from "../models/transport-manager.model";
 import { Session, SessionState } from "../models/session.model";
+import { Credentials } from "../models/auth.model";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -31,7 +32,7 @@ class SessionManager implements TransportManager {
     return session;
   }
 
-  authenticateClient(): boolean {
+  async authenticateClient(credentials: Credentials): Promise<boolean> {
     // Implementation will be added
     return false;
   }

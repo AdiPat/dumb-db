@@ -1,5 +1,7 @@
 import type TransportManager from "../models/transport-manager.model";
 import { Session, SessionState } from "../models/session.model";
+import { Credentials, AuthResult } from "../models/auth.model";
+import { AuthService } from "./auth-service";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -8,10 +10,12 @@ import { v4 as uuidv4 } from "uuid";
 class ConnectionManager implements TransportManager {
   private sessions: Map<string, Session>;
   private maxSessions: number;
+  private authService: AuthService;
 
   constructor(maxSessions: number = 100) {
     this.sessions = new Map();
     this.maxSessions = maxSessions;
+    this.authService = new AuthService();
   }
 
   handleConnection(): Session {
@@ -30,8 +34,21 @@ class ConnectionManager implements TransportManager {
     return session;
   }
 
-  authenticateClient(): boolean {
-    // Implementation will be added
+  async authenticateClient(credentials: Credentials): Promise<boolean> {
+    const session = this.getSessionByCredentials(credentials);
+    if (!session) {
+      return false;
+    }
+
+    const authResult = await this.authService.authenticate(credentials);
+    if (authResult.success && authResult.securityContext) {
+      session.state = SessionState.ACTIVE;
+      session.lastActivity = new Date();
+      session.securityContext = authResult.securityContext;
+      return true;
+    }
+
+    session.state = SessionState.TERMINATED;
     return false;
   }
 
@@ -46,6 +63,18 @@ class ConnectionManager implements TransportManager {
   // Helper methods
   getSessions(): Map<string, Session> {
     return this.sessions;
+  }
+
+  getSessionByCredentials(credentials: Credentials): Session | undefined {
+    for (const session of this.sessions.values()) {
+      if (
+        session.credentials &&
+        session.credentials.username === credentials.username
+      ) {
+        return session;
+      }
+    }
+    return undefined;
   }
 }
 
